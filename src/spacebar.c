@@ -28,6 +28,7 @@ struct display_manager g_display_manager;
 struct application_manager g_application_manager;
 struct daemon g_daemon;
 struct bar_manager g_bar_manager;
+struct performance_stats g_performance_stats;
 int g_connection;
 
 char g_socket_file[MAXLEN];
@@ -250,7 +251,7 @@ int main(int argc, char **argv)
     workspace_event_handler_init(&g_workspace_context);
     application_manager_init(&g_application_manager);
     bar_manager_init(&g_bar_manager);
-
+    performance_stats_init(&g_performance_stats);
     event_loop_begin(&g_event_loop);
     display_manager_begin(&g_display_manager);
     process_manager_begin(&g_process_manager);

@@ -1,4 +1,5 @@
 #include "bar_manager.h"
+#include <stdio.h>
 
 void bar_manager_set_foreground_color(struct bar_manager *bar_manager, uint32_t color)
 {
@@ -178,6 +179,24 @@ void bar_manager_set_power_strip(struct bar_manager *bar_manager, char **icon_st
     }
 
 bar_manager_refresh(bar_manager);
+}
+
+void bar_manager_set_cpu_icon(struct bar_manager *bar_manager, char *icon)
+{
+    if (bar_manager->cpu_icon.line) {
+        printf("CPU icon already exists and will delete it\n");
+        bar_destroy_line(bar_manager->cpu_icon);
+    }
+    if (icon != bar_manager->_cpu_icon) { //new icon is the same as the existing
+        if (bar_manager->_cpu_icon) { //already has icon, which is heap allocated from caller
+            free(bar_manager->_cpu_icon);
+        }
+
+        bar_manager->_cpu_icon = icon;
+    }
+
+    bar_manager->cpu_icon = bar_prepare_line(bar_manager->i_font, bar_manager->_cpu_icon,
+            bar_manager->cpu_icon_color);
 }
 
 void bar_manager_set_clock_icon(struct bar_manager *bar_manager, char *icon)
@@ -535,6 +554,8 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->display = "all";
     bar_manager->position = "top";
     bar_manager->height = 26;
+    bar_manager->cpu = true; //enable cpu usage by default
+    bar_manager->memory = true; //enable memory usage by default
     bar_manager->title = true;
     bar_manager->spaces = true;
     bar_manager->clock = true;
@@ -551,9 +572,14 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->space_icon_color = rgba_color_from_hex(0xffd75f5f);
     bar_manager->space_icon_color_secondary = rgba_color_from_hex(0xffd75f5f);
     bar_manager->space_icon_color_tertiary = rgba_color_from_hex(0xffd75f5f);
+    bar_manager->cpu_icon_color = rgba_color_from_hex(0xffa8a8a8);
+    bar_manager->memory_icon_color = rgba_color_from_hex(0xffa8a8a8);
     bar_manager->battery_icon_color = rgba_color_from_hex(0xffd75f5f);
     bar_manager->power_icon_color = rgba_color_from_hex(0xffcd950c);
     bar_manager->clock_icon_color = rgba_color_from_hex(0xffa8a8a8);
+    bar_manager_set_cpu_icon(bar_manager, string_copy("?"));
+    //do not see a reason to have a set icon color for CPU,
+    //since the color is defined and set in above method
     bar_manager_set_clock_icon(bar_manager, string_copy(""));
     bar_manager->_clock_format = "%R";
     bar_manager_set_space_icon(bar_manager, string_copy("•"));

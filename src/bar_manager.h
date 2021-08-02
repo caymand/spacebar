@@ -11,6 +11,8 @@ struct bar_manager
   CTFontRef i_font;
   char **_space_icon_strip;
   char **_power_icon_strip;
+  char *_cpu_icon;
+  char *_memory_icon;
   char *_clock_icon;
   char *_clock_format;
   char *_space_icon;
@@ -29,6 +31,8 @@ struct bar_manager
   bool spaces;
   bool spaces_for_all_displays;
   bool display_separator;
+  bool cpu;
+  bool memory;
   bool clock;
   bool power;
   bool dnd;
@@ -46,6 +50,8 @@ struct bar_manager
   struct rgba_color space_icon_color;
   struct rgba_color space_icon_color_secondary;
   struct rgba_color space_icon_color_tertiary;
+  struct rgba_color cpu_icon_color;
+  struct rgba_color memory_icon_color;
   struct rgba_color battery_icon_color;
   struct rgba_color power_icon_color;
   struct rgba_color clock_icon_color;
@@ -56,6 +62,8 @@ struct bar_manager
   struct rgba_color background_color_dim;
   struct bar_line *space_icon_strip;
   struct bar_line space_icon;
+  struct bar_line cpu_icon; //specify the cpu field on the bar
+  struct bar_line memory_icon;
   struct bar_line clock_icon;
   struct bar_line battr_icon;
   struct bar_line power_icon;

@@ -1,4 +1,5 @@
 #include "bar.h"
+#include <stdio.h>
 
 extern struct event_loop g_event_loop;
 extern struct bar_manager g_bar_manager;
@@ -362,6 +363,23 @@ void bar_refresh(struct bar *bar)
       }
     }
 
+    if (g_bar_manager.cpu) {
+        char *cpu_usage = "50%";
+        struct bar_line cpu_line = bar_prepare_line(g_bar_manager.t_font, cpu_usage, g_bar_manager.foreground_color);
+        CGPoint cpu_pos = bar_align_line(bar, cpu_line, ALIGN_RIGHT, ALIGN_CENTER);
+        cpu_pos.x = bar_right_first_item_x - cpu_line.bounds.size.width;
+        bar_draw_line(bar, cpu_line, cpu_pos.x, cpu_pos.y);
+
+        struct bar_line cpu_icon = g_bar_manager.cpu_icon;
+        cpu_icon.color = g_bar_manager.cpu_icon_color;
+        CGPoint cpu_icon_pos = bar_align_line(bar, cpu_icon, 0, ALIGN_CENTER);
+        cpu_icon_pos.x = cpu_pos.x - cpu_icon.bounds.size.width - 5;
+
+        bar_right_first_item_x = cpu_icon_pos.x - g_bar_manager.spacing_right;
+        bar_draw_line(bar, cpu_icon, cpu_icon_pos.x, cpu_icon_pos.y);
+        bar_destroy_line(cpu_line);
+    }
+
     if (g_bar_manager.power) {
       bool has_batt = false;
       bool charging = false;
@@ -557,6 +575,8 @@ struct bar *bar_create(uint32_t did)
     int shell_refresh_frequency = 5;
     bar->power_source = IOPSNotificationCreateRunLoopSource(power_handler, NULL);
     bar->refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + refresh_frequency, refresh_frequency, 0, 0, timer_handler, NULL);
+    //TODO:
+    //Create handler for CFRunloop to get cpu usage every 5 seconds
     bar->shell_refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + shell_refresh_frequency, shell_refresh_frequency, 0, 0, shell_timer_handler, NULL);
 
     CFRunLoopAddSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
