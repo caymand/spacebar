@@ -52,6 +52,7 @@
 #include "application_manager.h"
 #include "bar.h"
 #include "bar_manager.h"
+#include "performance_stats.h"
 
 #include "event_loop.c"
 #include "event.c"
@@ -64,5 +65,6 @@
 #include "bar.c"
 #include "bar_manager.c"
 #include "application_manager.c"
+#include "performance_stats.c"
 
 #include "spacebar.c"

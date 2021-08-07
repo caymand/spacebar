@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <mach/message.h>
-#include "performance_stats.h"
 //Get the memory use from:
 // Active, speculative, wired
 
@@ -25,12 +24,16 @@ int performance_stats_init(struct performance_stats *performance_stats) {
         fprintf(stderr, "Failed to get the host port\n");
         return EXIT_FAILURE;
     }
+
     //Use the host name port and send privilege to get the page size of the host
     if (host_page_size(host, &page_size) != KERN_SUCCESS) {
         fprintf(stderr, "Failed to get the VM page size, but uses page size of 4K bytes\n");
         page_size = 4096; //use default page size
     }
+    //Setup peformance stats when all systems calls went well
+    performance_stats->host = host;
     performance_stats->page_size = page_size;
+    performance_stats->memory_used = 0;
     performance_stats->cpu_load = cpu_used(host);
     return EXIT_SUCCESS;
 }
@@ -45,6 +48,18 @@ void print_memory_usage(host_t host, vm_size_t page_size) {
     }
 }
 
+float performance_stats_cpu(host_cpu_load_info_data_t first_tick,
+        host_cpu_load_info_data_t second_tick) {
+
+    unsigned long long diff_user = second_tick.cpu_ticks[CPU_STATE_USER] - first_tick.cpu_ticks[CPU_STATE_USER];
+    unsigned long long diff_system = second_tick.cpu_ticks[CPU_STATE_SYSTEM] - first_tick.cpu_ticks[CPU_STATE_SYSTEM];
+    unsigned long long diff_nice = second_tick.cpu_ticks[CPU_STATE_NICE] - first_tick.cpu_ticks[CPU_STATE_NICE];
+    unsigned long long diff_idle = second_tick.cpu_ticks[CPU_STATE_IDLE] - first_tick.cpu_ticks[CPU_STATE_IDLE];
+
+    unsigned long long used_cpu_ticks = diff_user + diff_system + diff_nice;
+    float cpu_used = (float) used_cpu_ticks / (used_cpu_ticks + diff_idle);
+    return cpu_used * 100;
+}
 
 void print_cpu_usage(host_t host) {
     host_cpu_load_info_data_t first_tick = cpu_used(host);

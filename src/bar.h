@@ -25,6 +25,9 @@ extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
 #define POWER_CALLBACK(name) void name(void *context)
 typedef POWER_CALLBACK(power_callback);
 
+//#define CPU_CALLBACK(name) void name(CFRunLoopTimerRef timer, void *info)
+//typedef CPU_CALLBACK(cpu_callback);
+
 #define TIMER_CALLBACK(name) void name(CFRunLoopTimerRef timer, void *context)
 typedef TIMER_CALLBACK(timer_callback);
 
