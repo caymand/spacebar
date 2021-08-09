@@ -92,6 +92,9 @@ void bar_manager_set_text_font(struct bar_manager *bar_manager, char *font_strin
 void bar_manager_set_icon_font(struct bar_manager *bar_manager, char *font_string);
 void bar_manager_set_space_strip(struct bar_manager *bar_manager, char **icon_strip);
 void bar_manager_set_power_strip(struct bar_manager *bar_manager, char **icon_strip);
+void bar_manager_set_cpu_icon(struct bar_manager *bar_manager, char *icon);
+void bar_manager_set_cpu(struct bar_manager *bar_manager, bool value);
+void bar_manager_set_cpu_icon_color(struct bar_manager *bar_manager, uint32_t color);
 void bar_manager_set_clock_icon(struct bar_manager *bar_manager, char *icon);
 void bar_manager_set_clock_format(struct bar_manager *bar_manager, char *format);
 void bar_manager_set_space_icon(struct bar_manager *bar_manager, char *icon);

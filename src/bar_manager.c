@@ -57,6 +57,11 @@ void bar_manager_set_clock_icon_color(struct bar_manager *bar_manager, uint32_t 
   bar_manager_refresh(bar_manager);
 }
 
+void bar_manager_set_cpu_icon_color(struct bar_manager *bar_manager, uint32_t color) {
+    bar_manager->cpu_icon_color = rgba_color_from_hex(color);
+    bar_manager_refresh(bar_manager);
+}
+
 void bar_manager_set_dnd_icon_color(struct bar_manager *bar_manager, uint32_t color)
 {
   bar_manager->dnd_icon_color = rgba_color_from_hex(color);
@@ -362,6 +367,11 @@ void bar_manager_set_clock(struct bar_manager *bar_manager, bool value)
   bar_manager_refresh(bar_manager);
 }
 
+void bar_manager_set_cpu(struct bar_manager *bar_manager, bool value) {
+    bar_manager->cpu = value;
+    bar_manager_refresh(bar_manager);
+}
+
 void bar_manager_set_power(struct bar_manager *bar_manager, bool value)
 {
   bar_manager->power = value;
@@ -572,14 +582,13 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->space_icon_color = rgba_color_from_hex(0xffd75f5f);
     bar_manager->space_icon_color_secondary = rgba_color_from_hex(0xffd75f5f);
     bar_manager->space_icon_color_tertiary = rgba_color_from_hex(0xffd75f5f);
-    bar_manager->cpu_icon_color = rgba_color_from_hex(0xffa8a8a8);
+    bar_manager->cpu_icon_color = rgba_color_from_hex(0xffa8a8a8); //default cpu icon color
     bar_manager->memory_icon_color = rgba_color_from_hex(0xffa8a8a8);
     bar_manager->battery_icon_color = rgba_color_from_hex(0xffd75f5f);
     bar_manager->power_icon_color = rgba_color_from_hex(0xffcd950c);
     bar_manager->clock_icon_color = rgba_color_from_hex(0xffa8a8a8);
-    bar_manager_set_cpu_icon(bar_manager, string_copy("?"));
-    //do not see a reason to have a set icon color for CPU,
-    //since the color is defined and set in above method
+    bar_manager_set_cpu_icon(bar_manager, string_copy("%"));
+    bar_manager_set_cpu_icon_color(bar_manager, 0xffa8a8a8);
     bar_manager_set_clock_icon(bar_manager, string_copy(""));
     bar_manager->_clock_format = "%R";
     bar_manager_set_space_icon(bar_manager, string_copy("•"));
