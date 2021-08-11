@@ -5,6 +5,7 @@ extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;
 extern struct bar_manager g_bar_manager;
 extern struct application_manager g_application_manager;
+extern struct performance_stats g_performance_stats;
 extern bool g_mission_control_active;
 extern int g_connection;
 
@@ -241,3 +242,22 @@ out:
 
     return EVENT_SUCCESS;
 }
+
+static EVENT_CALLBACK(EVEMT_HANDLER_PERFORMANCE_STATS_REFRESH) {
+    //TODO: Call performance stats methods, as to make this a handler for both statistics
+
+    // FIND CPU USAGE
+    char cpu_usage_str[11];
+    host_cpu_load_info_data_t curr_load = cpu_used(g_performance_stats.host);
+    float cpu_usage = performance_stats_cpu(g_performance_stats.cpu_load, curr_load);
+    g_performance_stats.cpu_load = curr_load;
+    sprintf(cpu_usage_str, "%.2f",  cpu_usage);
+    // CPU USAGE FOUND
+
+    bar_manager_set_cpu_output(&g_bar_manager, cpu_usage_str);
+    return EVENT_SUCCESS;
+
+}
+
+
+

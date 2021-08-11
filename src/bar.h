@@ -21,12 +21,16 @@ extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
 #define kCGSHighQualityResamplingTagBit (1 <<  4)
 #define kCGSIgnoreForExposeTagBit       (1 <<  7)
 #define kCGSStickyTagBit                (1 << 11)
+#define PERFORMANCE_STATS_REFRESH_TIME 5
 
 #define POWER_CALLBACK(name) void name(void *context)
 typedef POWER_CALLBACK(power_callback);
 
-//#define CPU_CALLBACK(name) void name(CFRunLoopTimerRef timer, void *info)
-//typedef CPU_CALLBACK(cpu_callback);
+//TODO: create performance stats event handler
+// create event to update menu
+// create event callback
+#define PERFORMANCE_STATS_CALLBACK(name) void name(CFRunLoopTimerRef timer, void *info)
+typedef PERFORMANCE_STATS_CALLBACK(performance_stats_callback);
 
 #define TIMER_CALLBACK(name) void name(CFRunLoopTimerRef timer, void *context)
 typedef TIMER_CALLBACK(timer_callback);
@@ -58,6 +62,7 @@ struct bar
     CFRunLoopSourceRef power_source;
     CFRunLoopTimerRef refresh_timer;
     CFRunLoopTimerRef shell_refresh_timer;
+    CFRunLoopTimerRef performance_stats_refresh_timer;
     CGRect frame;
 };
 

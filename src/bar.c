@@ -23,10 +23,10 @@ static SHELL_TIMER_CALLBACK(shell_timer_handler)
     event_loop_post(&g_event_loop, event);
 }
 
-//static CPU_CALLBACK(cpu_handler)
-//{
-//    printf("Callback works\n");
-//}
+static PERFORMANCE_STATS_CALLBACK(performance_stats_callback) {
+    struct event *event = event_create(&g_event_loop, PERFORMANCE_STATS_REFRESH, NULL);
+    event_loop_post(&g_event_loop, event);
+}
 
 static int bar_find_battery_life(bool *has_battery, bool *charging)
 {
@@ -370,16 +370,8 @@ void bar_refresh(struct bar *bar)
     }
 
     if (g_bar_manager.cpu) {
-        // FIND CPU USAGE
-        char cpu_usage_str[11];
-        host_cpu_load_info_data_t curr_load = cpu_used(g_performance_stats.host);
-        float cpu_usage = performance_stats_cpu(g_performance_stats.cpu_load, curr_load);
-        g_performance_stats.cpu_load = curr_load;
-        sprintf(cpu_usage_str, "%.2f",  cpu_usage);
-        // CPU USAGE FOUND
-
         struct bar_line cpu_line = bar_prepare_line(g_bar_manager.t_font,
-                cpu_usage_str, g_bar_manager.foreground_color);
+                g_bar_manager.cpu_output, g_bar_manager.foreground_color);
         CGPoint cpu_pos = bar_align_line(bar, cpu_line, ALIGN_RIGHT, ALIGN_CENTER);
         cpu_pos.x = bar_right_first_item_x - cpu_line.bounds.size.width;
         bar_draw_line(bar, cpu_line, cpu_pos.x, cpu_pos.y);
@@ -590,7 +582,10 @@ struct bar *bar_create(uint32_t did)
     bar->power_source = IOPSNotificationCreateRunLoopSource(power_handler, NULL);
     bar->refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + refresh_frequency, refresh_frequency, 0, 0, timer_handler, NULL);
     //TODO:
-    //Create handler for CFRunloop to get cpu usage every 5 seconds
+    //Create handler for CFRunloop to get mem usage every 5 seconds
+    bar->performance_stats_refresh_timer = CFRunLoopTimerCreate(NULL,
+            CFAbsoluteTimeGetCurrent() + PERFORMANCE_STATS_REFRESH_TIME, PERFORMANCE_STATS_REFRESH_TIME,
+            0, 0, performance_stats_callback, NULL);
 
     bar->shell_refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + shell_refresh_frequency, shell_refresh_frequency, 0, 0, shell_timer_handler, NULL);
 
@@ -613,6 +608,9 @@ void bar_destroy(struct bar *bar)
 
     CFRunLoopRemoveTimer(CFRunLoopGetMain(), bar->shell_refresh_timer, kCFRunLoopCommonModes);
     CFRunLoopTimerInvalidate(bar->shell_refresh_timer);
+
+    CFRunLoopRemoveTimer(CFRunLoopGetMain(), bar->performance_stats_refresh_timer, kCFRunLoopCommonModes);
+    CFRunLoopTimerInvalidate(bar->performance_stats_refresh_timer);
 
     CGContextRelease(bar->context);
     SLSReleaseWindow(g_connection, bar->id);

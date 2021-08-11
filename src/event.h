@@ -20,6 +20,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
 static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH);
 static EVENT_CALLBACK(EVENT_HANDLER_SHELL_REFRESH);
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
+static EVENT_CALLBACK(EVEMT_HANDLER_PERFORMANCE_STATS_REFRESH);
 
 #define EVENT_QUEUED     0x0
 #define EVENT_PROCESSED  0x1
@@ -51,7 +52,8 @@ enum event_type
     SHELL_REFRESH,
     DAEMON_MESSAGE,
 
-    EVENT_TYPE_COUNT
+    EVENT_TYPE_COUNT,
+    PERFORMANCE_STATS_REFRESH
 };
 
 static const char *event_type_str[] =
@@ -75,7 +77,8 @@ static const char *event_type_str[] =
     [SHELL_REFRESH]                  = "shell_refresh",
     [DAEMON_MESSAGE]                 = "daemon_message",
 
-    [EVENT_TYPE_COUNT]               = "event_type_count"
+    [EVENT_TYPE_COUNT]               = "event_type_count",
+    [PERFORMANCE_STATS_REFRESH]      = "performance_stats_refresh"
 };
 
 static event_callback *event_handler[] =
@@ -96,6 +99,7 @@ static event_callback *event_handler[] =
     [BAR_REFRESH]                    = EVENT_HANDLER_BAR_REFRESH,
     [SHELL_REFRESH]                  = EVENT_HANDLER_SHELL_REFRESH,
     [DAEMON_MESSAGE]                 = EVENT_HANDLER_DAEMON_MESSAGE,
+    [PERFORMANCE_STATS_REFRESH]      = EVEMT_HANDLER_PERFORMANCE_STATS_REFRESH,
 };
 
 struct event
