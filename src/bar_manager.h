@@ -96,7 +96,7 @@ void bar_manager_set_power_strip(struct bar_manager *bar_manager, char **icon_st
 void bar_manager_set_cpu_icon(struct bar_manager *bar_manager, char *icon);
 void bar_manager_set_cpu(struct bar_manager *bar_manager, bool value);
 void bar_manager_set_cpu_icon_color(struct bar_manager *bar_manager, uint32_t color);
-void bar_manager_set_cpu_output(struct bar_manager *bar_manager, char cpu_oad[]);
+void bar_manager_set_cpu_output(struct bar_manager *bar_manager, char *cpu_load);
 void bar_manager_set_clock_icon(struct bar_manager *bar_manager, char *icon);
 void bar_manager_set_clock_format(struct bar_manager *bar_manager, char *format);
 void bar_manager_set_space_icon(struct bar_manager *bar_manager, char *icon);

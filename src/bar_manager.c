@@ -62,7 +62,7 @@ void bar_manager_set_cpu_icon_color(struct bar_manager *bar_manager, uint32_t co
     bar_manager_refresh(bar_manager);
 }
 
-void bar_manager_set_cpu_output(struct bar_manager *bar_manager, char cpu_load[]) {
+void bar_manager_set_cpu_output(struct bar_manager *bar_manager, char *cpu_load) {
     bar_manager->cpu_output = cpu_load;
     bar_manager_refresh(bar_manager);
 }
@@ -594,7 +594,10 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->clock_icon_color = rgba_color_from_hex(0xffa8a8a8);
     bar_manager_set_cpu_icon(bar_manager, string_copy("%"));
     bar_manager_set_cpu_icon_color(bar_manager, 0xffa8a8a8);
-    bar_manager_set_cpu_output(bar_manager, "0.0");
+    char cpu_output_str[11];
+    float init_cpu_load = 0.0;
+    sprintf(cpu_output_str, "%.2f", init_cpu_load);
+    bar_manager_set_cpu_output(bar_manager, string_copy(cpu_output_str));
     bar_manager_set_clock_icon(bar_manager, string_copy(""));
     bar_manager->_clock_format = "%R";
     bar_manager_set_space_icon(bar_manager, string_copy("•"));

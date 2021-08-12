@@ -23,7 +23,7 @@ static SHELL_TIMER_CALLBACK(shell_timer_handler)
     event_loop_post(&g_event_loop, event);
 }
 
-static PERFORMANCE_STATS_CALLBACK(performance_stats_callback) {
+static PERFORMANCE_STATS_CALLBACK(performance_stats_handler) {
     struct event *event = event_create(&g_event_loop, PERFORMANCE_STATS_REFRESH, NULL);
     event_loop_post(&g_event_loop, event);
 }
@@ -231,7 +231,6 @@ void bar_refresh(struct bar *bar)
     CGContextSetRGBFillColor(bar->context, g_bar_manager.background_color.r, g_bar_manager.background_color.g, g_bar_manager.background_color.b, g_bar_manager.background_color.a);
     CGContextFillRect(bar->context, bar->frame);
     CGContextStrokePath(bar->context);
-
     //
     // BAR LEFT
     //
@@ -585,13 +584,14 @@ struct bar *bar_create(uint32_t did)
     //Create handler for CFRunloop to get mem usage every 5 seconds
     bar->performance_stats_refresh_timer = CFRunLoopTimerCreate(NULL,
             CFAbsoluteTimeGetCurrent() + PERFORMANCE_STATS_REFRESH_TIME, PERFORMANCE_STATS_REFRESH_TIME,
-            0, 0, performance_stats_callback, NULL);
+            0, 0, performance_stats_handler, NULL);
 
     bar->shell_refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + shell_refresh_frequency, shell_refresh_frequency, 0, 0, shell_timer_handler, NULL);
 
     CFRunLoopAddSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(CFRunLoopGetMain(), bar->shell_refresh_timer, kCFRunLoopCommonModes);
+    CFRunLoopAddTimer(CFRunLoopGetMain(), bar->performance_stats_refresh_timer, kCFRunLoopCommonModes); //add timer to run loop before it can get fired
 
     bar_refresh(bar);
 
@@ -610,7 +610,7 @@ void bar_destroy(struct bar *bar)
     CFRunLoopTimerInvalidate(bar->shell_refresh_timer);
 
     CFRunLoopRemoveTimer(CFRunLoopGetMain(), bar->performance_stats_refresh_timer, kCFRunLoopCommonModes);
-    CFRunLoopTimerInvalidate(bar->performance_stats_refresh_timer);
+    CFRunLoopTimerInvalidate(bar->performance_stats_refresh_timer);// There is only once reference to the timer, so we can just invalidate it and memory will be released
 
     CGContextRelease(bar->context);
     SLSReleaseWindow(g_connection, bar->id);
