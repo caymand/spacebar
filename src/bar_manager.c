@@ -1,6 +1,8 @@
 #include "bar_manager.h"
 #include <stdio.h>
 
+extern struct performance_stats g_performance_stats;
+
 void bar_manager_set_foreground_color(struct bar_manager *bar_manager, uint32_t color)
 {
     bar_manager->foreground_color = rgba_color_from_hex(color);
@@ -61,9 +63,24 @@ void bar_manager_set_cpu_icon_color(struct bar_manager *bar_manager, uint32_t co
     bar_manager->cpu_icon_color = rgba_color_from_hex(color);
     bar_manager_refresh(bar_manager);
 }
+void bar_manager_set_mem_icon_color(struct bar_manager *bar_manager, uint32_t color) {
+    bar_manager->mem_icon_color = rgba_color_from_hex(color);
+    bar_manager_refresh(bar_manager);
+}
 
-void bar_manager_set_cpu_output(struct bar_manager *bar_manager, char *cpu_load) {
-    bar_manager->cpu_output = cpu_load;
+void bar_manager_set_cpu_output(struct bar_manager *bar_manager, float cpu_load) {
+    char cpu_usage_str[CPU_USAGE_STR_LEN];
+    snprintf(cpu_usage_str, CPU_USAGE_STR_LEN, "%.2f", cpu_load);
+    memcpy(bar_manager->cpu_output, cpu_usage_str, CPU_USAGE_STR_LEN);
+
+    bar_manager_refresh(bar_manager);
+}
+
+void bar_manager_set_mem_output(struct bar_manager *bar_manager, int mem_usage) {
+    char mem_buf[MEM_USAGE_STR_LEN];
+    snprintf(mem_buf, MEM_USAGE_STR_LEN, "%d", mem_usage);//check return value is MEM_USAGE_STR_LEN
+    memcpy(bar_manager->mem_output, mem_buf, MEM_USAGE_STR_LEN);
+
     bar_manager_refresh(bar_manager);
 }
 
@@ -207,6 +224,25 @@ void bar_manager_set_cpu_icon(struct bar_manager *bar_manager, char *icon)
 
     bar_manager->cpu_icon = bar_prepare_line(bar_manager->i_font, bar_manager->_cpu_icon,
             bar_manager->cpu_icon_color);
+}
+
+void bar_manager_set_mem_icon(struct bar_manager *bar_manager, char *icon)
+{
+    if (bar_manager->mem_icon.line) {
+        bar_destroy_line(bar_manager->mem_icon);
+    }
+
+    if (icon != bar_manager->_mem_icon) {
+        if (bar_manager->_mem_icon) {
+            free(bar_manager->_mem_icon);
+        }
+
+        bar_manager->_mem_icon = icon;
+    }
+
+    bar_manager->mem_icon = bar_prepare_line(bar_manager->i_font, bar_manager->_mem_icon, bar_manager->foreground_color);
+
+    bar_manager_refresh(bar_manager);
 }
 
 void bar_manager_set_clock_icon(struct bar_manager *bar_manager, char *icon)
@@ -374,6 +410,11 @@ void bar_manager_set_clock(struct bar_manager *bar_manager, bool value)
 
 void bar_manager_set_cpu(struct bar_manager *bar_manager, bool value) {
     bar_manager->cpu = value;
+    bar_manager_refresh(bar_manager);
+}
+
+void bar_manager_set_mem(struct bar_manager *bar_manager, bool value) {
+    bar_manager->mem = value;
     bar_manager_refresh(bar_manager);
 }
 
@@ -570,7 +611,7 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->position = "top";
     bar_manager->height = 26;
     bar_manager->cpu = true; //enable cpu usage by default
-    bar_manager->memory = true; //enable memory usage by default
+    bar_manager->mem = true; //enable memory usage by default
     bar_manager->title = true;
     bar_manager->spaces = true;
     bar_manager->clock = true;
@@ -588,16 +629,21 @@ void bar_manager_init(struct bar_manager *bar_manager)
     bar_manager->space_icon_color_secondary = rgba_color_from_hex(0xffd75f5f);
     bar_manager->space_icon_color_tertiary = rgba_color_from_hex(0xffd75f5f);
     bar_manager->cpu_icon_color = rgba_color_from_hex(0xffa8a8a8); //default cpu icon color
-    bar_manager->memory_icon_color = rgba_color_from_hex(0xffa8a8a8);
+    bar_manager->mem_icon_color = rgba_color_from_hex(0xffa8a8a8);
     bar_manager->battery_icon_color = rgba_color_from_hex(0xffd75f5f);
     bar_manager->power_icon_color = rgba_color_from_hex(0xffcd950c);
     bar_manager->clock_icon_color = rgba_color_from_hex(0xffa8a8a8);
+
     bar_manager_set_cpu_icon(bar_manager, string_copy("%"));
     bar_manager_set_cpu_icon_color(bar_manager, 0xffa8a8a8);
-    char cpu_output_str[11];
-    float init_cpu_load = 0.0;
-    sprintf(cpu_output_str, "%.2f", init_cpu_load);
-    bar_manager_set_cpu_output(bar_manager, string_copy(cpu_output_str));
+    bar_manager->cpu_output = malloc(CPU_USAGE_STR_LEN); //allocate cpu string field
+    bar_manager_set_cpu_output(bar_manager, 0.0);
+
+    bar_manager_set_mem_icon(bar_manager, string_copy("?"));
+    bar_manager_set_mem_icon_color(bar_manager, 0xffa8a8a8);
+    bar_manager->mem_output = malloc(MEM_USAGE_STR_LEN); //allocate memory string field
+    bar_manager_set_mem_output(bar_manager, g_performance_stats.memory_used);
+
     bar_manager_set_clock_icon(bar_manager, string_copy(""));
     bar_manager->_clock_format = "%R";
     bar_manager_set_space_icon(bar_manager, string_copy("•"));

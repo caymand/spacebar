@@ -244,18 +244,16 @@ out:
 }
 
 static EVENT_CALLBACK(EVEMT_HANDLER_PERFORMANCE_STATS_REFRESH) {
-    //TODO: Call performance stats methods, as to make this a handler for both statistics
-    int cpu_usage_str_length = 11;
-
-    char cpu_usage_str[cpu_usage_str_length];
+    //TODO: Optimize performance_stats_cpu call by using pass by refrence.
+    // --however the host_cpu_load_info_data_t struct is a struct with one array of cpu ticks
     host_cpu_load_info_data_t curr_load = cpu_used(g_performance_stats.host);
     float cpu_usage = performance_stats_cpu(g_performance_stats.cpu_load, curr_load);
     g_performance_stats.cpu_load = curr_load;
-    sprintf(cpu_usage_str, "%.2f",  cpu_usage);
+    bar_manager_set_cpu_output(&g_bar_manager, cpu_usage);
 
-    memcpy(g_bar_manager.cpu_output, cpu_usage_str, cpu_usage_str_length);
+    int mem_usage = performance_stats_memory(&g_performance_stats);
+    bar_manager_set_mem_output(&g_bar_manager, mem_usage);
 
-    //bar_manager_set_cpu_output(&g_bar_manager, cpu_usage_output_ptr);
     return EVENT_SUCCESS;
 
 }

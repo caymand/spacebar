@@ -385,6 +385,23 @@ void bar_refresh(struct bar *bar)
         bar_destroy_line(cpu_line);
     }
 
+    if (g_bar_manager.mem) {
+        struct bar_line mem_line = bar_prepare_line(g_bar_manager.t_font,
+                g_bar_manager.mem_output, g_bar_manager.foreground_color);
+        CGPoint mem_pos = bar_align_line(bar, mem_line, ALIGN_RIGHT, ALIGN_CENTER);
+        mem_pos.x = bar_right_first_item_x - mem_line.bounds.size.width;
+        bar_draw_line(bar, mem_line, mem_pos.x, mem_pos.y);
+
+        struct bar_line mem_icon = g_bar_manager.mem_icon;
+        mem_icon.color = g_bar_manager.mem_icon_color;
+        CGPoint mem_icon_pos = bar_align_line(bar, mem_icon, 0, ALIGN_CENTER);
+        mem_icon_pos.x = mem_pos.x - mem_icon.bounds.size.width - 5;
+
+        bar_right_first_item_x = mem_icon_pos.x - g_bar_manager.spacing_right;
+        bar_draw_line(bar, mem_icon, mem_icon_pos.x, mem_icon_pos.y);
+        bar_destroy_line(mem_line);
+    }
+
     if (g_bar_manager.power) {
       bool has_batt = false;
       bool charging = false;

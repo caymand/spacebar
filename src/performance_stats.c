@@ -33,19 +33,20 @@ int performance_stats_init(struct performance_stats *performance_stats) {
     //Setup peformance stats when all systems calls went well
     performance_stats->host = host;
     performance_stats->page_size = page_size;
-    performance_stats->memory_used = 0;
+    performance_stats->memory_used = performance_stats_memory(performance_stats);
     performance_stats->cpu_load = cpu_used(host);
     return EXIT_SUCCESS;
 }
 
-void print_memory_usage(host_t host, vm_size_t page_size) {
-    int pages = vm_pages_used(host);
+
+int performance_stats_memory(struct performance_stats *performance_stats) {
+    int pages = vm_pages_used(performance_stats->host);
     if (pages < 0) {
         fprintf(stderr, "Failed to get memory usage.\n");
-    } else {
-        unsigned long mem_used = (pages * page_size)/MBYTE; //ignoring decimals
-        fprintf(stdout, "Memory used: %lu\n", mem_used);//mult of long and int
+        return -1;
     }
+    int mem_used = (pages * performance_stats->page_size)/MBYTE;
+    return mem_used;
 }
 
 float performance_stats_cpu(host_cpu_load_info_data_t first_tick,
@@ -61,22 +62,6 @@ float performance_stats_cpu(host_cpu_load_info_data_t first_tick,
     return cpu_used * 100;
 }
 
-void print_cpu_usage(host_t host) {
-    host_cpu_load_info_data_t first_tick = cpu_used(host);
-    sleep(5);
-    host_cpu_load_info_data_t second_tick = cpu_used(host);
-
-    unsigned long long diff_user = second_tick.cpu_ticks[CPU_STATE_USER] - first_tick.cpu_ticks[CPU_STATE_USER];
-    unsigned long long diff_system = second_tick.cpu_ticks[CPU_STATE_SYSTEM] - first_tick.cpu_ticks[CPU_STATE_SYSTEM];
-    unsigned long long diff_nice = second_tick.cpu_ticks[CPU_STATE_NICE] - first_tick.cpu_ticks[CPU_STATE_NICE];
-    unsigned long long diff_idle = second_tick.cpu_ticks[CPU_STATE_IDLE] - first_tick.cpu_ticks[CPU_STATE_IDLE];
-
-    unsigned long long used_cpu_ticks = diff_user + diff_system + diff_nice;
-    float cpu_used = (float) used_cpu_ticks / (used_cpu_ticks + diff_idle);
-    cpu_used *= 100;
-    fprintf(stdout, "CPU USAGE: %f\n", cpu_used);
-}
-
 host_cpu_load_info_data_t cpu_used(host_t host) {
     host_cpu_load_info_data_t cpu_load_info;
     mach_msg_type_number_t msg_type_count = HOST_CPU_LOAD_INFO_COUNT;
@@ -90,9 +75,7 @@ host_cpu_load_info_data_t cpu_used(host_t host) {
     return cpu_load_info;
 }
 
-
-
-int vm_pages_used(host_t host) {
+static int vm_pages_used(host_t host) {
     vm_statistics64_data_t vm_stats;
     mach_msg_type_number_t msg_type = HOST_VM_INFO64_COUNT;
     //pointer to host port, flavor is VM info for 64 bit machine

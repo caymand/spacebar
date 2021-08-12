@@ -250,14 +250,14 @@ int main(int argc, char **argv)
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);
     application_manager_init(&g_application_manager);
+    //TODO: assert that setup went well
+    performance_stats_init(&g_performance_stats);
     bar_manager_init(&g_bar_manager);
     event_loop_begin(&g_event_loop);
     display_manager_begin(&g_display_manager);
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     application_manager_begin(&g_application_manager);
-    //TODO: assert that setup went well
-    performance_stats_init(&g_performance_stats);
     bar_manager_begin(&g_bar_manager);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
 

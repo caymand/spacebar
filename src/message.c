@@ -19,6 +19,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_BAR_SPACE_ICON_COLOR_TERTIARY       "space_icon_color_tertiary"
 #define COMMAND_CONFIG_BAR_BATTERY_ICON_COLOR              "battery_icon_color"
 #define COMMAND_CONFIG_BAR_CPU_ICON_COLOR                  "cpu_icon_color"
+#define COMMAND_CONFIG_BAR_MEM_ICON_COLOR                  "mem_icon_color"
 #define COMMAND_CONFIG_BAR_POWER_ICON_COLOR                "power_icon_color"
 #define COMMAND_CONFIG_BAR_CLOCK_ICON_COLOR                "clock_icon_color"
 #define COMMAND_CONFIG_BAR_DND                             "dnd"
@@ -28,6 +29,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_BAR_SPACE_STRIP                     "space_icon_strip"
 #define COMMAND_CONFIG_BAR_POWER_STRIP                     "power_icon_strip"
 #define COMMAND_CONFIG_BAR_CPU_ICON                        "cpu_icon"
+#define COMMAND_CONFIG_BAR_MEM_ICON                        "mem_icon"
 #define COMMAND_CONFIG_BAR_SPACE_ICON                      "space_icon"
 #define COMMAND_CONFIG_BAR_CLOCK_ICON                      "clock_icon"
 #define COMMAND_CONFIG_BAR_CLOCK_FORMAT                    "clock_format"
@@ -44,6 +46,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_BAR_CLOCK                           "clock"
 #define COMMAND_CONFIG_BAR_POWER                           "power"
 #define COMMAND_CONFIG_BAR_CPU                             "cpu"
+#define COMMAND_CONFIG_BAR_MEM                             "mem"
 #define COMMAND_CONFIG_BAR_LEFT_SHELL                      "left_shell"
 #define COMMAND_CONFIG_BAR_RIGHT_SHELL                     "right_shell"
 #define COMMAND_CONFIG_BAR_CENTER_SHELL                    "center_shell"
@@ -248,6 +251,13 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             bar_manager_set_cpu_icon(&g_bar_manager, token_to_string(token));
         }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_MEM_ICON)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+            fprintf(rsp, "%s\n", g_bar_manager._mem_icon ? g_bar_manager._mem_icon : "");
+        } else {
+            bar_manager_set_mem_icon(&g_bar_manager, token_to_string(token));
+        }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_ICON_COLOR)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
@@ -328,6 +338,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             uint32_t color = token_to_uint32t(token);
             if (color) {
                 bar_manager_set_cpu_icon_color(&g_bar_manager, color);
+            } else { daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", token.length, token.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_MEM_ICON_COLOR)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+	        fprintf(rsp, "0x%x\n", g_bar_manager.mem_icon_color.p);
+        } else {
+            uint32_t color = token_to_uint32t(token);
+            if (color) {
+                bar_manager_set_mem_icon_color(&g_bar_manager, color);
             } else { daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", token.length, token.text, command.length, command.text, domain.length, domain.text);
             }
         }
@@ -450,6 +471,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             bar_manager_set_cpu(&g_bar_manager, false);
         } else if (token_equals(token, ARGUMENT_COMMON_VAL_ON)) {
             bar_manager_set_cpu(&g_bar_manager, true);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", token.length, token.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_MEM)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+            fprintf(rsp, "%s\n", bool_str[g_bar_manager.mem]);
+        } else if (token_equals(token, ARGUMENT_COMMON_VAL_OFF)) {
+            bar_manager_set_mem(&g_bar_manager, false);
+        } else if (token_equals(token, ARGUMENT_COMMON_VAL_ON)) {
+            bar_manager_set_mem(&g_bar_manager, true);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", token.length, token.text, command.length, command.text, domain.length, domain.text);
         }
