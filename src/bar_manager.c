@@ -72,13 +72,13 @@ void bar_manager_set_cpu_output(struct bar_manager *bar_manager, float cpu_load)
     char cpu_usage_str[CPU_USAGE_STR_LEN];
     snprintf(cpu_usage_str, CPU_USAGE_STR_LEN, "%.2f", cpu_load);
     memcpy(bar_manager->cpu_output, cpu_usage_str, CPU_USAGE_STR_LEN);
-
+    printf("CPU: %s\n", cpu_usage_str);
     bar_manager_refresh(bar_manager);
 }
 
 void bar_manager_set_mem_output(struct bar_manager *bar_manager, int mem_usage) {
     char mem_buf[MEM_USAGE_STR_LEN];
-    snprintf(mem_buf, MEM_USAGE_STR_LEN, "%d", mem_usage);//check return value is MEM_USAGE_STR_LEN
+    snprintf(mem_buf, MEM_USAGE_STR_LEN, "%dMB", mem_usage);//check return value is MEM_USAGE_STR_LEN
     memcpy(bar_manager->mem_output, mem_buf, MEM_USAGE_STR_LEN);
 
     bar_manager_refresh(bar_manager);
@@ -211,11 +211,10 @@ bar_manager_refresh(bar_manager);
 void bar_manager_set_cpu_icon(struct bar_manager *bar_manager, char *icon)
 {
     if (bar_manager->cpu_icon.line) {
-        printf("CPU icon already exists and will delete it\n");
         bar_destroy_line(bar_manager->cpu_icon);
     }
-    if (icon != bar_manager->_cpu_icon) { //new icon is the same as the existing
-        if (bar_manager->_cpu_icon) { //already has icon, which is heap allocated from caller
+    if (icon != bar_manager->_cpu_icon) {
+        if (bar_manager->_cpu_icon) {
             free(bar_manager->_cpu_icon);
         }
 

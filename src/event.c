@@ -249,9 +249,9 @@ static EVENT_CALLBACK(EVEMT_HANDLER_PERFORMANCE_STATS_REFRESH) {
     host_cpu_load_info_data_t curr_load = cpu_used(g_performance_stats.host);
     float cpu_usage = performance_stats_cpu(g_performance_stats.cpu_load, curr_load);
     g_performance_stats.cpu_load = curr_load;
-    bar_manager_set_cpu_output(&g_bar_manager, cpu_usage);
-
     int mem_usage = performance_stats_memory(&g_performance_stats);
+
+    bar_manager_set_cpu_output(&g_bar_manager, cpu_usage);
     bar_manager_set_mem_output(&g_bar_manager, mem_usage);
 
     return EVENT_SUCCESS;

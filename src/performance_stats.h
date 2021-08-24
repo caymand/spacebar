@@ -2,7 +2,7 @@
 
 #define MBYTE 1000000
 #define CPU_USAGE_STR_LEN 11
-#define MEM_USAGE_STR_LEN 11
+#define MEM_USAGE_STR_LEN 13 //10 bytes at most for int, 2 bytes for MB, and 1 for line terminator
 
 struct performance_stats {
     mach_port_t host;
